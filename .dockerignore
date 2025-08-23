@@ -1,0 +1,14 @@
+.git
+.gitignore
+README.md
+*.md
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.local
+gitlab/
+gitlab/**
+*.log
+.DS_Store
