@@ -11,7 +11,8 @@ A minimal FastAPI service (Alpine-based) that implements two features against **
 
 - Docker
 - A reachable GitLab instance (gitlab.com or local Dockerized GitLab 15.11)
-- A GitLab **Personal Access Token (PAT)** with at least `api` scope
+  > See [Local GitLab playground](#local-gitlab-playground-optional) if you don’t want to use gitlab.com.
+- A GitLab **Personal Access Token (PAT)** with at least `api` and `write_repository` scope
 
 > On macOS with Docker Desktop: when your GitLab runs on the **host** (e.g., `-p 80:80`), containers should reach it via `http://host.docker.internal/`.
 
@@ -89,7 +90,7 @@ Examples:
 curl -s "http://localhost:8080/created/issues/2025" | jq 'length'
 
 # Inspect first few MRs created in 2025
-curl -s "http://localhost:8080/created/mr/2025" | jq '.[0:3]'
+curl -s "http://localhost:8080/created/mr/2025" | jq 'length'
 ```
 
 ### Local GitLab playground (optional)
@@ -109,8 +110,17 @@ docker run -d --hostname gitlab.example.com \
   gitlab/gitlab-ee:15.11.13-ee.0
 ```
 
+> The initialization may take 10-15 minutes based on the machine resources.
+
+You can search for the "gitlab Reconfigured!" on the logs
+
+```bash
+docker logs gitlab -f | grep "gitlab Reconfigured"
+```
+
 - Log in as root (password in /etc/gitlab/initial_root_password inside the container).
-- Create a PAT (scope: api).
+  > docker exec -it gitlab bash -c 'cat /etc/gitlab/initial_root_password' | grep -i password
+- Create a PAT (scope: api, write_repository).
 - (Optional) Seed data using GitLab’s GPT data generator. If you do, point the generator JSON URL to http://host.docker.internal/ so its container can reach the host-published GitLab.
 
 ---
