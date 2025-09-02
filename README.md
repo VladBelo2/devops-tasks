@@ -29,9 +29,10 @@ docker build -t gitlab-api-service:15.11 .
 ### 2) Run the container
 
 ```bash
-docker run --rm -p 8080:8080 \
+docker run -d -p 8080:8080 \
+  --name gitlab-api-service \
   -e GITLAB_URL="http://host.docker.internal/" \
-  -e GITLAB_TOKEN="glpat-REPLACE_ME" \
+  -e GITLAB_TOKEN="glpat-<REPLACE_ME_WITH_TOKEN>" \
   gitlab-api-service:15.11
 ```
 
@@ -58,7 +59,7 @@ Grant or change a user’s role on a project or group.
 
 ```bash
 {
-  "username": "testuest",
+  "username": "testuser",
   "target":   "group/subgroup/project",   // or "group[/subgroup]" for groups
   "role":     "developer"                 // or "10|20|30|40|50"
 }
@@ -93,6 +94,8 @@ curl -s "http://localhost:8080/created/issues/2025" | jq 'length'
 curl -s "http://localhost:8080/created/mr/2025" | jq 'length'
 ```
 
+---
+
 ### Local GitLab playground (optional)
 
 If you don’t want to use gitlab.com, you can run a local GitLab 15.11:
@@ -119,9 +122,48 @@ docker logs gitlab -f | grep "gitlab Reconfigured"
 ```
 
 - Log in as root (password in /etc/gitlab/initial_root_password inside the container).
-  > docker exec -it gitlab bash -c 'cat /etc/gitlab/initial_root_password' | grep -i password
+  > docker exec -it gitlab bash -c 'cat /etc/gitlab/initial_root_password' | grep -i "Password:"
 - Create a PAT (scope: api, write_repository).
-- (Optional) Seed data using GitLab’s GPT data generator. If you do, point the generator JSON URL to http://host.docker.internal/ so its container can reach the host-published GitLab.
+- (Optional) Seed data using GitLab’s GPT data generator. If you do, point the generator JSON URL to http://host.docker.internal/ so its container can reach the host-published GitLab. Example Below
+
+```bash
+cat > $GITLAB_HOME/gpt.json <<EOF
+{
+  "environment": {
+    "name": "10k",
+    "url": "http://host.docker.internal/",
+    "user": "root",
+    "config": {
+      "latency": "0"
+    },
+    "storage_nodes": ["default"]
+  },
+  "gpt_data": {
+    "root_group": "gpt",
+    "large_projects": {
+      "group": "large_projects",
+      "project": "gitlabhq"
+    },
+    "many_groups_and_projects": {
+      "group": "many_groups_and_projects",
+      "subgroups": 10,
+      "subgroup_prefix": "gpt-subgroup-",
+      "projects": 5,
+      "project_prefix": "gpt-project-"
+    }
+  }
+}
+EOF
+```
+
+Then run the following docker:
+
+```bash
+docker run -it -e ACCESS_TOKEN='glpat-<REPLACE_ME_WITH_TOKEN>' \
+ --name gitlab-gpt-generator \
+ -v $GITLAB_HOME/gpt.json:/tmp/gpt.json \
+ gitlab/gpt-data-generator "--environment=/tmp/gpt.json"
+```
 
 ---
 
