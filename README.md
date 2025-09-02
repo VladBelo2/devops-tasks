@@ -1,6 +1,6 @@
 # GitLab 15.11 API Mini-Service (Roles + Created-In-Year)
 
-A minimal FastAPI service (Alpine-based) that implements two features against **GitLab 15.11 REST (v4)**:
+A minimal FastAPI service (Alpine-based) that implements two features against **GitLab 15.11 REST**:
 
 1. **Grant / change role** for a given user on a **project or group**
 2. **List all issues or merge requests created in a given year**
@@ -164,6 +164,8 @@ docker run -it -e ACCESS_TOKEN='glpat-<REPLACE_ME_WITH_TOKEN>' \
  -v $GITLAB_HOME/gpt.json:/tmp/gpt.json \
  gitlab/gpt-data-generator "--environment=/tmp/gpt.json"
 ```
+
+**Back to [Quick Start](#quick-start).**
 
 ---
 
