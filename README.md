@@ -12,7 +12,8 @@ A minimal FastAPI service (Alpine-based) that implements two features against **
 - Docker
 - A reachable GitLab instance (gitlab.com or local Dockerized GitLab 15.11)
   > See [Local GitLab playground](#local-gitlab-playground-optional) if you don’t want to use gitlab.com.
-- A GitLab **Personal Access Token (PAT)** with at least `api` and `write_repository` scope
+- A GitLab **Personal Access Token (PAT)** with at least `api` scope
+  > Note: the optional GPT data generator may also require `write_repository`
 
 > On macOS with Docker Desktop: when your GitLab runs on the **host** (e.g., `-p 80:80`), containers should reach it via `http://host.docker.internal/`.
 
@@ -36,7 +37,7 @@ docker run -d -p 8080:8080 \
   gitlab-api-service:15.11
 ```
 
-- Service is now at http://localhost/
+- Service is now at http://localhost:8080/
 - GITLAB_URL points to your GitLab base URL (containers → host)
 - GITLAB_TOKEN is your PAT (do not commit it)
 
@@ -57,11 +58,11 @@ You should see version JSON (e.g., 15.11.13-ee).
 
 Grant or change a user’s role on a project or group.
 
-```bash
+```json
 {
   "username": "testuser",
-  "target":   "group/subgroup/project",   // or "group[/subgroup]" for groups
-  "role":     "developer"                 // or "10|20|30|40|50"
+  "target": "group/subgroup/project", // or "group[/subgroup]" for groups
+  "role": "developer" // or "10|20|30|40|50"
 }
 ```
 
@@ -74,7 +75,7 @@ Notes
 - If the user already has the requested level as a direct member, returns "action":"noop".
 - Attempting to “downgrade” someone who inherits Owner from a parent group will 400 (GitLab behavior).
 
-```bash
+```json
 curl -s -X POST http://localhost:8080/roles/grant \
   -H 'Content-Type: application/json' \
   -d '{"username":"testuser","target":"gpt/many_groups_and_projects/gpt-subgroup-1/gpt-project-1","role":"developer"}' | jq .
@@ -86,7 +87,7 @@ Return all items of a kind created in a calendar year.
 
 Examples:
 
-```bash
+```json
 # How many issues created in 2025?
 curl -s "http://localhost:8080/created/issues/2025" | jq 'length'
 
@@ -124,7 +125,8 @@ docker logs gitlab -f | grep "gitlab Reconfigured"
 - Log in as root (password in /etc/gitlab/initial_root_password inside the container).
   > docker exec -it gitlab bash -c 'cat /etc/gitlab/initial_root_password' | grep -i "Password:"
 - Create a PAT (scope: api, write_repository).
-- (Optional) Seed data using GitLab’s GPT data generator. If you do, point the generator JSON URL to http://host.docker.internal/ so its container can reach the host-published GitLab. Example Below
+- (Optional) Seed data using GitLab’s GPT data generator. If you do, point the generator JSON URL to http://host.docker.internal/ so its container can reach the host-published GitLab.
+  Example Below
 
 ```bash
 cat > $GITLAB_HOME/gpt.json <<EOF
