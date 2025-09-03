@@ -58,11 +58,11 @@ You should see version JSON (e.g., 15.11.13-ee).
 
 Grant or change a user’s role on a project or group.
 
-```json
+```bash
 {
   "username": "testuser",
-  "target": "group/subgroup/project", // or "group[/subgroup]" for groups
-  "role": "developer" // or "10|20|30|40|50"
+  "target":   "group/subgroup/project", // or "group[/subgroup]" for groups
+  "role":     "developer" // or "10|20|30|40|50"
 }
 ```
 
@@ -75,7 +75,7 @@ Notes
 - If the user already has the requested level as a direct member, returns "action":"noop".
 - Attempting to “downgrade” someone who inherits Owner from a parent group will 400 (GitLab behavior).
 
-```json
+```bash
 curl -s -X POST http://localhost:8080/roles/grant \
   -H 'Content-Type: application/json' \
   -d '{"username":"testuser","target":"gpt/many_groups_and_projects/gpt-subgroup-1/gpt-project-1","role":"developer"}' | jq .
@@ -87,7 +87,7 @@ Return all items of a kind created in a calendar year.
 
 Examples:
 
-```json
+```bash
 # How many issues created in 2025?
 curl -s "http://localhost:8080/created/issues/2025" | jq 'length'
 
